@@ -48,7 +48,7 @@ func Intersection(it1, it2 Items) (dst Items) {
 	it1 = s1.Items()
 	it2 = s2.Items()
 	pos := 0
-	for i := 0; i < it2.Len(); i++ {
+	for i := 0; i < it2.Len() && pos < it1.Len(); i++ {
 		v := it2.Elem(i)
 		pos += s1.Search(v, pos)
 		if pos == it1.Len() || !it1.Elem(pos).Equal(v) {
