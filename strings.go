@@ -11,14 +11,10 @@ type StringElement string
 var _ Element = StringElement(0)
 
 // Less ...
-func (p StringElement) Less(v Element) bool {
-	return p < v.(StringElement)
-}
+func (p StringElement) Less(v Element) bool { return p < v.(StringElement) }
 
 // Equal ...
-func (p StringElement) Equal(v Element) bool {
-	return p == v.(StringElement)
-}
+func (p StringElement) Equal(v Element) bool { return p == v.(StringElement) }
 
 // StringSlice ...
 type StringSlice []string
@@ -35,19 +31,13 @@ func (p StringSlice) Less(i, j int) bool { return p[i] < p[j] }
 func (p StringSlice) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 
 // Elem ...
-func (p StringSlice) Elem(i int) Element {
-	return StringElement(p[i])
-}
+func (p StringSlice) Elem(i int) Element { return StringElement(p[i]) }
 
 // SetElem ...
-func (p StringSlice) SetElem(v Element, pos int) {
-	p[pos] = string(v.(StringElement))
-}
+func (p StringSlice) SetElem(v Element, pos int) { p[pos] = string(v.(StringElement)) }
 
 // Move ...
-func (p StringSlice) Move(dstPos, srcPos, n int) {
-	copy(p[dstPos:dstPos+n], p[srcPos:srcPos+n])
-}
+func (p StringSlice) Move(dstPos, srcPos, n int) { copy(p[dstPos:dstPos+n], p[srcPos:srcPos+n]) }
 
 // Append ...
 func (p StringSlice) Append(arr ...Element) Items {
@@ -58,7 +48,4 @@ func (p StringSlice) Append(arr ...Element) Items {
 }
 
 // Truncate ...
-func (p StringSlice) Truncate(n int) Items {
-	p = p[:n]
-	return p
-}
+func (p StringSlice) Truncate(n int) Items { return p[:n] }
