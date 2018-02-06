@@ -74,7 +74,7 @@ func (p *set) Erase(items Items) (eraseNum int) {
 		sort.Sort(items)
 	}
 	pos := 0
-	for i := 0; i < items.Len(); i++ {
+	for i := 0; i < items.Len() && pos < p.items.Len(); i++ {
 		v := items.Elem(i)
 		pos += p.Search(v, pos)
 		if pos == p.items.Len() || !p.items.Elem(pos).Equal(v) {
