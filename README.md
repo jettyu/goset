@@ -1,0 +1,2 @@
+# goset
+set for go
