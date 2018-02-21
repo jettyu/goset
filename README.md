@@ -1,4 +1,4 @@
-# slice to set
+# set
 
 set for go
 
