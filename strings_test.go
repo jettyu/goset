@@ -2,14 +2,12 @@ package goset_test
 
 import (
 	"fmt"
-	"log"
 	"testing"
 
 	"github.com/jettyu/goset"
 )
 
 func TestStrings(t *testing.T) {
-	log.SetFlags(log.Lshortfile)
 	s := goset.Strings([]string{"2", "6", "4", "5", "4", "2", "3", "0", "1"})
 	arr, ok := s.Items().(goset.StringSlice)
 	if !ok {

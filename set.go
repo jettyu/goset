@@ -91,3 +91,7 @@ func (p *set) Erase(items Items) (eraseNum int) {
 func (p set) Items() Items {
 	return p.items
 }
+
+func (p set) Equal(items Items) bool {
+	return Equal(p.items, items)
+}

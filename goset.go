@@ -27,6 +27,20 @@ type Set interface {
 	Erase(v Items) int
 	Items() Items
 	Search(v Element, pos int) int
+	Equal(Items) bool
+}
+
+// Equal ...
+func Equal(it1, it2 Items) bool {
+	if it1.Len() != it2.Len() {
+		return false
+	}
+	for i := 0; i < it1.Len(); i++ {
+		if !it1.Elem(i).Equal(it2.Elem(i)) {
+			return false
+		}
+	}
+	return true
 }
 
 // Union ...
