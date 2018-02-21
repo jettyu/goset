@@ -4,6 +4,12 @@ import (
 	"reflect"
 )
 
+// SliceElement ...
+type SliceElement interface {
+	Element
+	Data() interface{}
+}
+
 // SliceItems ...
 type SliceItems interface {
 	Items
@@ -99,6 +105,10 @@ type sliceElement struct {
 	v         interface{}
 	lessFunc  func(s1, s2 interface{}) bool
 	equalFunc func(s1, s2 interface{}) bool
+}
+
+func (p sliceElement) Data() interface{} {
+	return p.v
 }
 
 func (p sliceElement) Less(e Element) bool  { return p.lessFunc(p.v, e.(sliceElement).v) }
