@@ -1,6 +1,6 @@
-# set
+# sort set
 
-set for go
+sort set for go
 
 ## example
 
