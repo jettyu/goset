@@ -9,9 +9,9 @@ import (
 func TestReflect(t *testing.T) {
 	uintitems := goset.UintItemsCreator([]uint{1, 5, 2, 4, 2, 6, 4, 3})
 	s := goset.NewSet(uintitems)
-	t.Log(s.Data().([]uint))
+	t.Log(s.Value().([]uint))
 	if !goset.Equal(s.Items(), goset.UintItemsCreator([]uint{1, 2, 3, 4, 5, 6})) {
-		t.Fatal(s.Data())
+		t.Fatal(s.Value())
 	}
 }
 
@@ -49,7 +49,7 @@ func TestReflectStruct(t *testing.T) {
 	})
 	userSet := goset.NewSet(items1)
 	// [{a 1} {d 1} {e 2} {c 5} {b 10}]
-	t.Log(userSet.Data().([]reflectUser))
+	t.Log(userSet.Value().([]reflectUser))
 	if !goset.Equal(userSet.Items(), reflectUserItemsCreator([]reflectUser{
 		{"a", 1},
 		{"d", 1},
@@ -64,7 +64,7 @@ func TestReflectStruct(t *testing.T) {
 func BenchmarkReflect(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = goset.NewSet(goset.IntItemsCreator(
-			[]int{1, 5, 2, 3, 3, 4})).Data()
+			[]int{1, 5, 2, 3, 3, 4})).Value()
 	}
 }
 

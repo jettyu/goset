@@ -4,9 +4,9 @@ import (
 	"reflect"
 )
 
-// ReflectData ...
-type ReflectData interface {
-	Data() interface{}
+// ReflectValue ...
+type ReflectValue interface {
+	Value() interface{}
 }
 
 // ReflectItemsCreator ...
@@ -115,7 +115,7 @@ type reflectItems struct {
 	swapFunc  func(i, j int, src interface{})
 }
 
-func (p reflectItems) Data() interface{} {
+func (p reflectItems) Value() interface{} {
 	return p.rv.Interface()
 }
 

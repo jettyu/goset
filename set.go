@@ -92,10 +92,10 @@ func (p set) Items() Items {
 	return p.items
 }
 
-func (p set) Data() interface{} {
-	data, ok := p.items.(ReflectData)
+func (p set) Value() interface{} {
+	data, ok := p.items.(ReflectValue)
 	if ok {
-		return data.Data()
+		return data.Value()
 	}
 	return p.items
 }

@@ -79,7 +79,7 @@ func TestReflectStruct(t *testing.T) {
     })
     userSet := goset.NewSet(items1)
     // [{a 1} {d 1} {e 2} {c 5} {b 10}]
-    t.Log(userSet.Data().([]reflectUser))
+    t.Log(userSet.Value().([]reflectUser))
     if !goset.Equal(userSet.Items(), reflectUserItemsCreator([]reflectUser{
         {"a", 1},
         {"d", 1},

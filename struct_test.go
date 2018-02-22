@@ -17,7 +17,7 @@ func TestStruct(t *testing.T) {
 	}
 	userSet := goset.NewSet(Users(users))
 	// [{a 1} {d 1} {e 2} {c 5} {b 10}]
-	t.Log(userSet.Data().(Users))
+	t.Log(userSet.Value().(Users))
 	if !goset.Equal(userSet.Items(), Users{
 		{"a", 1},
 		{"d", 1},
