@@ -26,6 +26,7 @@ type Set interface {
 	Insert(v Items) int
 	Erase(v Items) int
 	Items() Items
+	Data() interface{}
 	Search(v Element, pos int) int
 	Equal(Items) bool
 }

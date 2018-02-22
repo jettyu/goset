@@ -8,10 +8,10 @@ import (
 
 func TestReflect(t *testing.T) {
 	uintitems := goset.UintItemsCreator([]uint{1, 5, 2, 4, 2, 6, 4, 3})
-	res := goset.NewSet(uintitems).Items().(goset.SliceItems)
-	t.Log(res.Data().([]uint))
-	if !goset.Equal(res, goset.UintItemsCreator([]uint{1, 2, 3, 4, 5, 6})) {
-		t.Fatal(res.Data())
+	s := goset.NewSet(uintitems)
+	t.Log(s.Data().([]uint))
+	if !goset.Equal(s.Items(), goset.UintItemsCreator([]uint{1, 2, 3, 4, 5, 6})) {
+		t.Fatal(s.Data())
 	}
 }
 
@@ -20,7 +20,7 @@ func TestReflectStruct(t *testing.T) {
 		Name string
 		Age  int
 	}
-	reflectUserItemsCreator := goset.ItemsCreator(
+	reflectUserItemsCreator := goset.ReflectItemsCreator(
 		func(s1, s2 interface{}) bool {
 			u1 := s1.(reflectUser)
 			u2 := s2.(reflectUser)
@@ -49,7 +49,7 @@ func TestReflectStruct(t *testing.T) {
 	})
 	userSet := goset.NewSet(items1)
 	// [{a 1} {d 1} {e 2} {c 5} {b 10}]
-	t.Log(userSet.Items().(goset.SliceItems).Data())
+	t.Log(userSet.Data().([]reflectUser))
 	if !goset.Equal(userSet.Items(), reflectUserItemsCreator([]reflectUser{
 		{"a", 1},
 		{"d", 1},
@@ -58,5 +58,18 @@ func TestReflectStruct(t *testing.T) {
 		{"b", 10},
 	})) {
 		t.Fatal(userSet.Items())
+	}
+}
+
+func BenchmarkReflect(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = goset.NewSet(goset.IntItemsCreator(
+			[]int{1, 5, 2, 3, 3, 4})).Data()
+	}
+}
+
+func BenchmarkInts(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = goset.Ints([]int{1, 5, 2, 3, 3, 4}).Items()
 	}
 }

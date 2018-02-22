@@ -4,20 +4,13 @@ import (
 	"reflect"
 )
 
-// SliceElement ...
-type SliceElement interface {
-	Element
+// ReflectData ...
+type ReflectData interface {
 	Data() interface{}
 }
 
-// SliceItems ...
-type SliceItems interface {
-	Items
-	Data() interface{}
-}
-
-// ItemsCreator ...
-var ItemsCreator = func(lessFunc func(s1, s2 interface{}) bool,
+// ReflectItemsCreator ...
+var ReflectItemsCreator = func(lessFunc func(s1, s2 interface{}) bool,
 	swapFunc func(i, j int, src interface{}),
 	equalFunc func(s1, s2 interface{}) bool,
 ) func(slice interface{}) Items {
@@ -28,7 +21,7 @@ var ItemsCreator = func(lessFunc func(s1, s2 interface{}) bool,
 				return reflect.DeepEqual(s1, s2)
 			}
 		}
-		return sliceItems{
+		return reflectItems{
 			rv:        rv,
 			lessFunc:  lessFunc,
 			equalFunc: equalFunc,
@@ -39,7 +32,7 @@ var ItemsCreator = func(lessFunc func(s1, s2 interface{}) bool,
 
 var (
 	// IntItemsCreator ...
-	IntItemsCreator = ItemsCreator(
+	IntItemsCreator = ReflectItemsCreator(
 		func(s1, s2 interface{}) bool {
 			return s1.(int) < s2.(int)
 		}, func(i, j int, src interface{}) {
@@ -49,7 +42,7 @@ var (
 		nil,
 	)
 	// Int64ItemsCreator ...
-	Int64ItemsCreator = ItemsCreator(
+	Int64ItemsCreator = ReflectItemsCreator(
 		func(s1, s2 interface{}) bool {
 			return s1.(int64) < s2.(int64)
 		}, func(i, j int, src interface{}) {
@@ -59,7 +52,7 @@ var (
 		nil,
 	)
 	// UintItemsCreator ...
-	UintItemsCreator = ItemsCreator(
+	UintItemsCreator = ReflectItemsCreator(
 		func(s1, s2 interface{}) bool {
 			return s1.(uint) < s2.(uint)
 		}, func(i, j int, src interface{}) {
@@ -69,7 +62,7 @@ var (
 		nil,
 	)
 	// Uint64ItemsCreator ...
-	Uint64ItemsCreator = ItemsCreator(
+	Uint64ItemsCreator = ReflectItemsCreator(
 		func(s1, s2 interface{}) bool {
 			return s1.(uint64) < s2.(uint64)
 		}, func(i, j int, src interface{}) {
@@ -79,7 +72,7 @@ var (
 		nil,
 	)
 	// Float32ItemsCreator ...
-	Float32ItemsCreator = ItemsCreator(
+	Float32ItemsCreator = ReflectItemsCreator(
 		func(s1, s2 interface{}) bool {
 			return s1.(float32) < s2.(float32)
 		}, func(i, j int, src interface{}) {
@@ -89,7 +82,7 @@ var (
 		nil,
 	)
 	// Float64ItemsCreator ...
-	Float64ItemsCreator = ItemsCreator(
+	Float64ItemsCreator = ReflectItemsCreator(
 		func(s1, s2 interface{}) bool {
 			return s1.(float64) < s2.(float64)
 		}, func(i, j int, src interface{}) {
@@ -114,32 +107,32 @@ func (p sliceElement) Data() interface{} {
 func (p sliceElement) Less(e Element) bool  { return p.lessFunc(p.v, e.(sliceElement).v) }
 func (p sliceElement) Equal(e Element) bool { return p.equalFunc(p.v, e.(sliceElement).v) }
 
-// sliceItems ...
-type sliceItems struct {
+// reflectItems ...
+type reflectItems struct {
 	rv        reflect.Value
 	lessFunc  func(s1, s2 interface{}) bool
 	equalFunc func(s1, s2 interface{}) bool
 	swapFunc  func(i, j int, src interface{})
 }
 
-func (p sliceItems) Data() interface{} {
+func (p reflectItems) Data() interface{} {
 	return p.rv.Interface()
 }
 
-var _ Items = sliceItems{}
+var _ Items = reflectItems{}
 
-func (p sliceItems) Len() int { return p.rv.Len() }
+func (p reflectItems) Len() int { return p.rv.Len() }
 
-func (p sliceItems) Less(i, j int) bool {
+func (p reflectItems) Less(i, j int) bool {
 	return p.Elem(i).Less(p.Elem(j))
 }
 
-func (p sliceItems) Swap(i, j int) {
+func (p reflectItems) Swap(i, j int) {
 	p.swapFunc(i, j, p.rv.Interface())
 }
 
 // Elem ...
-func (p sliceItems) Elem(i int) Element {
+func (p reflectItems) Elem(i int) Element {
 	return sliceElement{
 		v:         p.rv.Index(i).Interface(),
 		lessFunc:  p.lessFunc,
@@ -148,17 +141,17 @@ func (p sliceItems) Elem(i int) Element {
 }
 
 // SetElem ...
-func (p sliceItems) SetElem(e Element, pos int) {
+func (p reflectItems) SetElem(e Element, pos int) {
 	p.rv.Index(pos).Set(reflect.ValueOf(e.(sliceElement).v))
 }
 
 // Move ...
-func (p sliceItems) Move(dstPos, srcPos, n int) {
+func (p reflectItems) Move(dstPos, srcPos, n int) {
 	reflect.Copy(p.rv.Slice(dstPos, dstPos+n), p.rv.Slice(srcPos, srcPos+n))
 }
 
 // Append ...
-func (p sliceItems) Append(e ...Element) Items {
+func (p reflectItems) Append(e ...Element) Items {
 	for _, v := range e {
 		p.rv = reflect.Append(p.rv, reflect.ValueOf(v.(sliceElement).v))
 	}
@@ -167,7 +160,7 @@ func (p sliceItems) Append(e ...Element) Items {
 }
 
 // Truncate ...
-func (p sliceItems) Truncate(n int) Items {
+func (p reflectItems) Truncate(n int) Items {
 	p.rv = p.rv.Slice(0, n)
 	return p
 }

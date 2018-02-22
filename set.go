@@ -92,6 +92,14 @@ func (p set) Items() Items {
 	return p.items
 }
 
+func (p set) Data() interface{} {
+	data, ok := p.items.(ReflectData)
+	if ok {
+		return data.Data()
+	}
+	return p.items
+}
+
 func (p set) Equal(items Items) bool {
 	return Equal(p.items, items)
 }
