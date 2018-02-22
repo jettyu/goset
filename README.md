@@ -50,7 +50,7 @@ func TestReflectStruct(t *testing.T) {
         Name string
         Age  int
     }
-    reflectUserItemsCreator := goset.ItemsCreator(
+    reflectUserItemsCreator := goset.ReflectItemsCreator(
         func(s1, s2 interface{}) bool {
             u1 := s1.(reflectUser)
             u2 := s2.(reflectUser)
@@ -87,7 +87,21 @@ func TestReflectStruct(t *testing.T) {
         {"c", 5},
         {"b", 10},
     })) {
-        t.Fatal(userSet.Items())
+        t.Fatal(userSet.Value())
+    }
+    // has {"c",5}
+    if !userSet.Has(reflectUser{"c", 5}, 0) {
+        t.Fatal(userSet.Value())
+    }
+    // erase {"c",5}
+    if userSet.Erase(reflectUserItemsCreator([]reflectUser{
+        {"c", 5},
+    })) != 1 {
+        t.Fatal(userSet.Value())
+    }
+    // not has {"c", 5}
+    if userSet.Has(reflectUser{"c", 5}, 0) {
+        t.Fatal(userSet.Value())
     }
 }
 ```

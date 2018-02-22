@@ -9,22 +9,27 @@ type set struct {
 var _ Set = (*set)(nil)
 
 // NewSet ...
-func NewSet(items Items) Set {
-	s := &set{items.Truncate(0)}
+func NewSet(items Items) (s Set) {
+	rit, ok := items.(reflectItems)
+	if ok {
+		s = &reflectSet{rit.truncate(0)}
+	} else {
+		s = &set{items.Truncate(0)}
+	}
 	s.Insert(items)
 	return s
 }
 
 // Search ...
-func (p *set) Search(v Element, pos int) int {
+func (p *set) Search(v interface{}, pos int) int {
 	return sort.Search(p.items.Len()-pos, func(i int) bool {
-		return !p.items.Elem(pos + i).Less(v)
+		return !p.items.Elem(pos + i).Less(v.(Element))
 	})
 }
 
-func (p *set) Has(v Element, pos int) bool {
+func (p *set) Has(v interface{}, pos int) bool {
 	n := p.Search(v, pos)
-	if n == p.items.Len() || !p.items.Elem(pos+n).Equal(v) {
+	if n == p.items.Len() || !p.items.Elem(pos+n).Equal(v.(Element)) {
 		return false
 	}
 	return true

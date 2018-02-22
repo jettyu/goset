@@ -22,17 +22,21 @@ type Items interface {
 
 // Set ...
 type Set interface {
-	Has(v Element, pos int) bool
+	Has(v interface{}, pos int) bool
 	Insert(v Items) int
 	Erase(v Items) int
 	Items() Items
 	Value() interface{}
-	Search(v Element, pos int) int
+	Search(v interface{}, pos int) int
 	Equal(Items) bool
 }
 
 // Equal ...
 func Equal(it1, it2 Items) bool {
+	rit, ok := it1.(reflectItems)
+	if ok {
+		return rit.equal(it2)
+	}
 	if it1.Len() != it2.Len() {
 		return false
 	}
@@ -53,6 +57,10 @@ func Union(it1, it2 Items) Items {
 
 // Intersection ...
 func Intersection(it1, it2 Items) (dst Items) {
+	rit, ok := it1.(reflectItems)
+	if ok {
+		return rit.intersection(it2)
+	}
 	dst = it1.Truncate(0)
 	if it1.Len() == 0 || it2.Len() == 0 {
 		return

@@ -7,7 +7,7 @@ import (
 )
 
 func TestReflect(t *testing.T) {
-	uintitems := goset.UintItemsCreator([]uint{1, 5, 2, 4, 2, 6, 4, 3})
+	uintitems := goset.UintItemsCreator([]uint{5, 1, 2, 4, 2, 6, 4, 3})
 	s := goset.NewSet(uintitems)
 	t.Log(s.Value().([]uint))
 	if !goset.Equal(s.Items(), goset.UintItemsCreator([]uint{1, 2, 3, 4, 5, 6})) {
@@ -57,7 +57,21 @@ func TestReflectStruct(t *testing.T) {
 		{"c", 5},
 		{"b", 10},
 	})) {
-		t.Fatal(userSet.Items())
+		t.Fatal(userSet.Value())
+	}
+	// has {"c",5}
+	if !userSet.Has(reflectUser{"c", 5}, 0) {
+		t.Fatal(userSet.Value())
+	}
+	// erase {"c",5}
+	if userSet.Erase(reflectUserItemsCreator([]reflectUser{
+		{"c", 5},
+	})) != 1 {
+		t.Fatal(userSet.Value())
+	}
+	// not has {"c", 5}
+	if userSet.Has(reflectUser{"c", 5}, 0) {
+		t.Fatal(userSet.Value())
 	}
 }
 

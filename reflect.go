@@ -2,6 +2,7 @@ package goset
 
 import (
 	"reflect"
+	"sort"
 )
 
 // ReflectValue ...
@@ -9,34 +10,43 @@ type ReflectValue interface {
 	Value() interface{}
 }
 
-// ReflectItemsCreator ...
-var ReflectItemsCreator = func(lessFunc func(s1, s2 interface{}) bool,
-	swapFunc func(i, j int, src interface{}),
-	equalFunc func(s1, s2 interface{}) bool,
-) func(slice interface{}) Items {
-	return func(slice interface{}) Items {
-		rv := reflect.ValueOf(slice)
-		if equalFunc == nil {
-			equalFunc = func(s1, s2 interface{}) bool {
-				return reflect.DeepEqual(s1, s2)
+var (
+	// ReflectItemsCreator ...
+	ReflectItemsCreator = func(lessFunc func(s1, s2 interface{}) bool,
+		swapFunc func(i, j int, src interface{}),
+		equalFunc func(s1, s2 interface{}) bool,
+	) func(slice interface{}) Items {
+		return func(slice interface{}) Items {
+			rv := reflect.ValueOf(slice)
+			if equalFunc == nil {
+				equalFunc = func(s1, s2 interface{}) bool {
+					return reflect.DeepEqual(s1, s2)
+				}
+			}
+			return reflectItems{
+				rv:        rv,
+				lessFunc:  lessFunc,
+				equalFunc: equalFunc,
+				swapFunc:  swapFunc,
 			}
 		}
-		return reflectItems{
-			rv:        rv,
-			lessFunc:  lessFunc,
-			equalFunc: equalFunc,
-			swapFunc:  swapFunc,
-		}
 	}
-}
-
-var (
 	// IntItemsCreator ...
 	IntItemsCreator = ReflectItemsCreator(
 		func(s1, s2 interface{}) bool {
 			return s1.(int) < s2.(int)
 		}, func(i, j int, src interface{}) {
 			arr := src.([]int)
+			arr[i], arr[j] = arr[j], arr[i]
+		},
+		nil,
+	)
+	// Int32ItemsCreator ...
+	Int32ItemsCreator = ReflectItemsCreator(
+		func(s1, s2 interface{}) bool {
+			return s1.(int32) < s2.(int32)
+		}, func(i, j int, src interface{}) {
+			arr := src.([]int32)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
 		nil,
@@ -57,6 +67,16 @@ var (
 			return s1.(uint) < s2.(uint)
 		}, func(i, j int, src interface{}) {
 			arr := src.([]uint)
+			arr[i], arr[j] = arr[j], arr[i]
+		},
+		nil,
+	)
+	// Uint32ItemsCreator ...
+	Uint32ItemsCreator = ReflectItemsCreator(
+		func(s1, s2 interface{}) bool {
+			return s1.(uint32) < s2.(uint32)
+		}, func(i, j int, src interface{}) {
+			arr := src.([]uint32)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
 		nil,
@@ -91,21 +111,125 @@ var (
 		},
 		nil,
 	)
+
+	// ReflectElementCreator ...
+	ReflectElementCreator = func(lessFunc func(s1, s2 interface{}) bool,
+		equalFunc func(s1, s2 interface{}) bool,
+	) func(v interface{}) Element {
+		return func(v interface{}) Element {
+			return reflectElement{
+				v:         v,
+				lessFunc:  lessFunc,
+				equalFunc: equalFunc,
+			}
+		}
+	}
 )
 
+type reflectSet struct {
+	items reflectItems
+}
+
+var _ Set = (*reflectSet)(nil)
+
+// Search ...
+func (p reflectSet) Search(v interface{}, pos int) int {
+	return sort.Search(p.items.Len()-pos, func(i int) bool {
+		return !p.items.lessFunc(p.items.elem(pos+i), v)
+	})
+}
+
+// Has ...
+func (p reflectSet) Has(v interface{}, pos int) bool {
+	n := p.Search(v, pos)
+	if n == p.items.Len() || !p.items.equalFunc(v, p.items.elem(pos+n)) {
+		return false
+	}
+	return true
+}
+
+func (p *reflectSet) Insert(it Items) (insertNum int) {
+	items := it.(reflectItems)
+	if !sort.IsSorted(items) {
+		sort.Sort(items)
+	}
+	pos := 0
+	for i := 0; i < items.Len(); i++ {
+		v := items.elem(i)
+		if p.items.Len() == 0 {
+			p.items = p.items.append(v)
+			insertNum++
+			pos++
+			continue
+		}
+		pos += p.Search(v, pos)
+		n := pos
+		if pos < p.items.Len() {
+			e := p.items.elem(pos)
+			if p.items.equalFunc(v, e) {
+				// has v
+				continue
+			} else if p.items.lessFunc(e, v) {
+				// less than v, insert after e
+				n++
+			}
+		} else {
+			pos--
+		}
+		insertNum++
+		p.items = p.items.append(v)
+		p.items.Move(pos+1, pos, p.items.Len()-(pos+1))
+		p.items.setElem(v, n)
+	}
+
+	return
+}
+
+func (p *reflectSet) Erase(it Items) (eraseNum int) {
+	items := it.(reflectItems)
+	if p.items.Len() == 0 {
+		return
+	}
+	if !sort.IsSorted(items) {
+		sort.Sort(items)
+	}
+
+	pos := 0
+	for i := 0; i < items.Len() && pos < p.items.Len(); i++ {
+		v := items.elem(i)
+		pos += p.Search(v, pos)
+		if pos == p.items.Len() || !p.items.equalFunc(p.items.elem(pos), v) {
+			continue
+		}
+		p.items.Move(pos, pos+1, p.items.Len()-(pos+1))
+		p.items = p.items.truncate(p.items.Len() - 1)
+		eraseNum++
+	}
+
+	return
+}
+
+func (p reflectSet) Items() Items {
+	return p.items
+}
+
+func (p reflectSet) Value() interface{} {
+	return p.items.Value()
+}
+
+func (p reflectSet) Equal(items Items) bool {
+	return p.items.equal(items)
+}
+
 // SliceElement ...
-type sliceElement struct {
+type reflectElement struct {
 	v         interface{}
 	lessFunc  func(s1, s2 interface{}) bool
 	equalFunc func(s1, s2 interface{}) bool
 }
 
-func (p sliceElement) Data() interface{} {
-	return p.v
-}
-
-func (p sliceElement) Less(e Element) bool  { return p.lessFunc(p.v, e.(sliceElement).v) }
-func (p sliceElement) Equal(e Element) bool { return p.equalFunc(p.v, e.(sliceElement).v) }
+func (p reflectElement) Less(e Element) bool  { return p.lessFunc(p.v, e.(reflectElement).v) }
+func (p reflectElement) Equal(e Element) bool { return p.equalFunc(p.v, e.(reflectElement).v) }
 
 // reflectItems ...
 type reflectItems struct {
@@ -124,7 +248,7 @@ var _ Items = reflectItems{}
 func (p reflectItems) Len() int { return p.rv.Len() }
 
 func (p reflectItems) Less(i, j int) bool {
-	return p.Elem(i).Less(p.Elem(j))
+	return p.lessFunc(p.rv.Index(i).Interface(), p.rv.Index(j).Interface())
 }
 
 func (p reflectItems) Swap(i, j int) {
@@ -133,7 +257,7 @@ func (p reflectItems) Swap(i, j int) {
 
 // Elem ...
 func (p reflectItems) Elem(i int) Element {
-	return sliceElement{
+	return reflectElement{
 		v:         p.rv.Index(i).Interface(),
 		lessFunc:  p.lessFunc,
 		equalFunc: p.equalFunc,
@@ -142,7 +266,7 @@ func (p reflectItems) Elem(i int) Element {
 
 // SetElem ...
 func (p reflectItems) SetElem(e Element, pos int) {
-	p.rv.Index(pos).Set(reflect.ValueOf(e.(sliceElement).v))
+	p.rv.Index(pos).Set(reflect.ValueOf(e.(reflectElement).v))
 }
 
 // Move ...
@@ -153,7 +277,7 @@ func (p reflectItems) Move(dstPos, srcPos, n int) {
 // Append ...
 func (p reflectItems) Append(e ...Element) Items {
 	for _, v := range e {
-		p.rv = reflect.Append(p.rv, reflect.ValueOf(v.(sliceElement).v))
+		p.rv = reflect.Append(p.rv, reflect.ValueOf(v.(reflectElement).v))
 	}
 
 	return p
@@ -161,6 +285,57 @@ func (p reflectItems) Append(e ...Element) Items {
 
 // Truncate ...
 func (p reflectItems) Truncate(n int) Items {
+	return p.truncate(n)
+}
+
+func (p reflectItems) elem(i int) interface{}         { return p.rv.Index(i).Interface() }
+func (p reflectItems) setElem(e interface{}, pos int) { p.rv.Index(pos).Set(reflect.ValueOf(e)) }
+func (p reflectItems) append(e ...interface{}) reflectItems {
+	for _, v := range e {
+		p.rv = reflect.Append(p.rv, reflect.ValueOf(v))
+	}
+
+	return p
+}
+func (p reflectItems) truncate(n int) reflectItems {
 	p.rv = p.rv.Slice(0, n)
 	return p
+}
+func (p reflectItems) equal(it Items) bool {
+	items, ok := it.(reflectItems)
+	if !ok {
+		return false
+	}
+	if p.Len() != items.Len() {
+		return false
+	}
+	for i := 0; i < p.Len(); i++ {
+		if !p.equalFunc(p.rv.Index(i).Interface(), items.rv.Index(i).Interface()) {
+			return false
+		}
+	}
+	return true
+}
+
+func (p reflectItems) intersection(it Items) (dst reflectItems) {
+	dst = p.truncate(0)
+	if p.Len() == 0 || it.Len() == 0 {
+		return
+	}
+
+	s1 := NewSet(p)
+	s2 := NewSet(it)
+	it1 := s1.Items().(reflectItems)
+	it2 := s2.Items().(reflectItems)
+	pos := 0
+	for i := 0; i < it2.Len() && pos < it1.Len(); i++ {
+		v := it2.elem(i)
+		pos += s1.Search(v, pos)
+		if pos == it1.Len() ||
+			!it1.equalFunc(it1.elem(pos), v) {
+			continue
+		}
+		dst = dst.append(v)
+	}
+	return
 }
