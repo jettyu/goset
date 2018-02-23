@@ -29,6 +29,7 @@ type Set interface {
 	Value() interface{}
 	Search(v interface{}, pos int) int
 	Equal(Items) bool
+	Get(v interface{}) (data interface{}, ok bool)
 }
 
 // Equal ...

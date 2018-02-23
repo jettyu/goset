@@ -98,13 +98,19 @@ func (p set) Items() Items {
 }
 
 func (p set) Value() interface{} {
-	data, ok := p.items.(ReflectValue)
-	if ok {
-		return data.Value()
-	}
 	return p.items
 }
 
 func (p set) Equal(items Items) bool {
 	return Equal(p.items, items)
+}
+
+func (p set) Get(v interface{}) (data interface{}, ok bool) {
+	pos := p.Search(v, 0)
+	if pos == p.items.Len() {
+		return
+	}
+	data = p.items.Elem(pos)
+	ok = p.items.Elem(pos).Equal(v.(Element))
+	return
 }

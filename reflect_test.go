@@ -75,6 +75,56 @@ func TestReflectStruct(t *testing.T) {
 	}
 }
 
+func TestReflectStruct1(t *testing.T) {
+	type reflectUser struct {
+		ID  string
+		Age int
+	}
+	reflectUserItemsCreator := goset.ReflectItemsCreator(
+		func(s1, s2 interface{}) bool {
+			u1 := s1.(reflectUser)
+			u2 := s2.(reflectUser)
+			return u1.Age < u2.Age
+		},
+		func(i, j int, slice interface{}) {
+			arr := slice.([]reflectUser)
+			arr[i], arr[j] = arr[j], arr[i]
+		},
+		func(s1, s2 interface{}) bool {
+			return s1.(reflectUser).ID == s2.(reflectUser).ID
+		},
+	)
+	users := []reflectUser{
+		{"a", 1},
+		{"b", 10},
+		{"d", 1},
+		{"c", 5},
+		{"b", 10},
+		{"e", 2},
+	}
+	items1 := goset.NewSet(reflectUserItemsCreator(users)).Items().(goset.ReflectItems)
+	items1 = items1.WithFunc(nil,
+		func(s1, s2 interface{}) bool { return s1.(reflectUser).ID == s2.(string) })
+	idItems := goset.StringsItemsCreator([]string{"a", "d", "e", "c", "b"})
+	if !goset.Equal(items1, idItems) {
+		t.Fatal(items1.(goset.ReflectValue).Value())
+	}
+	items1 = items1.WithFunc(func(s1, s2 interface{}) bool {
+		u, ok := s2.(reflectUser)
+		if ok {
+			return s1.(reflectUser).ID < u.ID
+		}
+		return s1.(reflectUser).ID < s2.(string)
+	}, nil)
+	if !goset.NewSet(items1).Has("c", 0) {
+		t.Fatal(items1.Value())
+	}
+	get, ok := goset.NewSet(items1).Get("c")
+	if !ok || get.(reflectUser).ID != "c" {
+		t.Fatal(get, ok)
+	}
+}
+
 func BenchmarkReflect(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = goset.NewSet(goset.IntItemsCreator(

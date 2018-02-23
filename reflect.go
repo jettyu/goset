@@ -10,6 +10,14 @@ type ReflectValue interface {
 	Value() interface{}
 }
 
+// ReflectItems ...
+type ReflectItems interface {
+	ReflectValue
+	Items
+	// WithFunc, func is invalid when is nil
+	WithFunc(lessFunc, equalFunc func(s1, s2 interface{}) bool) ReflectItems
+}
+
 var (
 	// Int32s ...
 	Int32s = func(arr []int32) Set { return NewSet(Int32ItemsCreator(arr)) }
@@ -46,6 +54,16 @@ var (
 			}
 		}
 	}
+	// StringsItemsCreator ...
+	StringsItemsCreator = ReflectItemsCreator(
+		func(s1, s2 interface{}) bool {
+			return s1.(string) < s2.(string)
+		}, func(i, j int, src interface{}) {
+			arr := src.([]string)
+			arr[i], arr[j] = arr[j], arr[i]
+		},
+		nil,
+	)
 	// IntItemsCreator ...
 	IntItemsCreator = ReflectItemsCreator(
 		func(s1, s2 interface{}) bool {
@@ -126,19 +144,6 @@ var (
 		},
 		nil,
 	)
-
-	// ReflectElementCreator ...
-	ReflectElementCreator = func(lessFunc func(s1, s2 interface{}) bool,
-		equalFunc func(s1, s2 interface{}) bool,
-	) func(v interface{}) Element {
-		return func(v interface{}) Element {
-			return reflectElement{
-				v:         v,
-				lessFunc:  lessFunc,
-				equalFunc: equalFunc,
-			}
-		}
-	}
 )
 
 type reflectSet struct {
@@ -157,7 +162,7 @@ func (p reflectSet) Search(v interface{}, pos int) int {
 // Has ...
 func (p reflectSet) Has(v interface{}, pos int) bool {
 	n := p.Search(v, pos)
-	if n == p.items.Len() || !p.items.equalFunc(v, p.items.elem(pos+n)) {
+	if n == p.items.Len() || !p.items.equalFunc(p.items.elem(pos+n), v) {
 		return false
 	}
 	return true
@@ -181,7 +186,7 @@ func (p *reflectSet) Insert(it Items) (insertNum int) {
 		n := pos
 		if pos < p.items.Len() {
 			e := p.items.elem(pos)
-			if p.items.equalFunc(v, e) {
+			if p.items.equalFunc(e, v) {
 				// has v
 				continue
 			} else if p.items.lessFunc(e, v) {
@@ -236,6 +241,16 @@ func (p reflectSet) Equal(items Items) bool {
 	return p.items.equal(items)
 }
 
+func (p reflectSet) Get(id interface{}) (data interface{}, ok bool) {
+	pos := p.Search(id, 0)
+	if pos == p.items.Len() {
+		return
+	}
+	data = p.items.elem(pos)
+	ok = p.items.equalFunc(p.items.elem(pos), id)
+	return
+}
+
 // SliceElement ...
 type reflectElement struct {
 	v         interface{}
@@ -258,7 +273,7 @@ func (p reflectItems) Value() interface{} {
 	return p.rv.Interface()
 }
 
-var _ Items = reflectItems{}
+var _ ReflectItems = reflectItems{}
 
 func (p reflectItems) Len() int { return p.rv.Len() }
 
@@ -301,6 +316,17 @@ func (p reflectItems) Append(e ...Element) Items {
 // Truncate ...
 func (p reflectItems) Truncate(n int) Items {
 	return p.truncate(n)
+}
+
+func (p reflectItems) WithFunc(lessFunc,
+	equalFunc func(s1, s2 interface{}) bool) ReflectItems {
+	if lessFunc != nil {
+		p.lessFunc = lessFunc
+	}
+	if equalFunc != nil {
+		p.equalFunc = equalFunc
+	}
+	return p
 }
 
 func (p reflectItems) elem(i int) interface{}         { return p.rv.Index(i).Interface() }
