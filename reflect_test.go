@@ -87,3 +87,27 @@ func BenchmarkInts(b *testing.B) {
 		_ = goset.Ints([]int{1, 5, 2, 3, 3, 4}).Items()
 	}
 }
+
+func BenchmarkEqual(b *testing.B) {
+	arr := []int{1, 5, 2, 3, 3, 4}
+	exp := []int{1, 2, 3, 4, 5}
+	items := goset.Ints(arr).Items()
+	expItems := goset.IntSlice(exp)
+	for i := 0; i < b.N; i++ {
+		if !goset.Equal(items, expItems) {
+			b.Fatal(items)
+		}
+	}
+}
+
+func BenchmarkReflectEqual(b *testing.B) {
+	arr := []int{1, 5, 2, 3, 3, 4}
+	exp := []int{1, 2, 3, 4, 5}
+	items := goset.NewSet(goset.IntItemsCreator(arr)).Items()
+	expItems := goset.IntItemsCreator(exp)
+	for i := 0; i < b.N; i++ {
+		if !goset.Equal(items, expItems) {
+			b.Fatal(items)
+		}
+	}
+}
