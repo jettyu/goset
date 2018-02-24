@@ -370,13 +370,15 @@ func (p reflectItems) intersection(it Items) (dst reflectItems) {
 	it2 := s2.Items().(reflectItems)
 	pos := 0
 	for i := 0; i < it2.Len() && pos < it1.Len(); i++ {
-		v := it2.elem(i)
-		pos += s1.Search(v, pos)
-		if pos == it1.Len() ||
-			!it1.equalFunc(it1.elem(pos), v) {
+		e := it2.elem(i)
+		pos += s1.Search(e, pos)
+		if pos == it1.Len() {
 			continue
 		}
-		dst = dst.append(v)
+		v := it1.elem(pos)
+		if it1.equalFunc(v, e) {
+			dst = dst.append(v)
+		}
 	}
 	return
 }

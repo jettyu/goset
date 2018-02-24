@@ -102,9 +102,16 @@ func TestReflectStruct1(t *testing.T) {
 		{"b", 10},
 		{"e", 2},
 	}
+	// equal by id
 	items1 := goset.NewSet(reflectUserItemsCreator(users)).Items().(goset.ReflectItems)
 	items1 = items1.WithFunc(nil,
-		func(s1, s2 interface{}) bool { return s1.(reflectUser).ID == s2.(string) })
+		func(s1, s2 interface{}) bool {
+			u, ok := s2.(reflectUser)
+			if ok {
+				return s1.(reflectUser).ID == u.ID
+			}
+			return s1.(reflectUser).ID == s2.(string)
+		})
 	idItems := goset.StringsItemsCreator([]string{"a", "d", "e", "c", "b"})
 	if !goset.Equal(items1, idItems) {
 		t.Fatal(items1.(goset.ReflectValue).Value())
@@ -116,12 +123,23 @@ func TestReflectStruct1(t *testing.T) {
 		}
 		return s1.(reflectUser).ID < s2.(string)
 	}, nil)
+	// has by id
 	if !goset.NewSet(items1).Has("c", 0) {
 		t.Fatal(items1.Value())
 	}
 	get, ok := goset.NewSet(items1).Get("c")
 	if !ok || get.(reflectUser).ID != "c" {
 		t.Fatal(get, ok)
+	}
+	// erase by id
+	s := goset.NewSet(items1)
+	s.Erase(goset.StringsItemsCreator([]string{"c"}))
+	t.Log(s.Value())
+	// intersection by id
+	idItems = goset.StringsItemsCreator([]string{"b", "d", "c"})
+	insItems := goset.Intersection(items1, idItems)
+	if !goset.Equal(insItems, goset.StringsItemsCreator([]string{"b", "d"})) {
+		t.Fatal(insItems.(goset.ReflectItems).Value())
 	}
 }
 
