@@ -38,8 +38,8 @@ var (
 	ReflectItemsCreator = func(lessFunc func(s1, s2 interface{}) bool,
 		swapFunc func(i, j int, src interface{}),
 		equalFunc func(s1, s2 interface{}) bool,
-	) func(slice interface{}) Items {
-		return func(slice interface{}) Items {
+	) func(slice interface{}) ReflectItems {
+		return func(slice interface{}) ReflectItems {
 			rv := reflect.ValueOf(slice)
 			if equalFunc == nil {
 				equalFunc = func(s1, s2 interface{}) bool {
