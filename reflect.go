@@ -19,10 +19,20 @@ type ReflectItems interface {
 }
 
 var (
+	// Int8s ...
+	Int8s = func(arr []int8) Set { return NewSet(Int8ItemsCreator(arr)) }
+	// Int16s ...
+	Int16s = func(arr []int16) Set { return NewSet(Int16ItemsCreator(arr)) }
 	// Int32s ...
 	Int32s = func(arr []int32) Set { return NewSet(Int32ItemsCreator(arr)) }
 	// Int64s ...
 	Int64s = func(arr []int64) Set { return NewSet(Int64ItemsCreator(arr)) }
+	// Uints ...
+	Uints = func(arr []uint) Set { return NewSet(UintItemsCreator(arr)) }
+	// Uint8s ...
+	Uint8s = func(arr []uint8) Set { return NewSet(Uint8ItemsCreator(arr)) }
+	// Uint16s ...
+	Uint16s = func(arr []uint16) Set { return NewSet(Uint16ItemsCreator(arr)) }
 	// Uint32s ...
 	Uint32s = func(arr []uint32) Set { return NewSet(Uint32ItemsCreator(arr)) }
 	// Uint64s ...
@@ -74,6 +84,26 @@ var (
 		},
 		nil,
 	)
+	// Int8ItemsCreator ...
+	Int8ItemsCreator = ReflectItemsCreator(
+		func(s1, s2 interface{}) bool {
+			return s1.(int8) < s2.(int8)
+		}, func(i, j int, src interface{}) {
+			arr := src.([]int8)
+			arr[i], arr[j] = arr[j], arr[i]
+		},
+		nil,
+	)
+	// Int16ItemsCreator ...
+	Int16ItemsCreator = ReflectItemsCreator(
+		func(s1, s2 interface{}) bool {
+			return s1.(int16) < s2.(int16)
+		}, func(i, j int, src interface{}) {
+			arr := src.([]int16)
+			arr[i], arr[j] = arr[j], arr[i]
+		},
+		nil,
+	)
 	// Int32ItemsCreator ...
 	Int32ItemsCreator = ReflectItemsCreator(
 		func(s1, s2 interface{}) bool {
@@ -100,6 +130,26 @@ var (
 			return s1.(uint) < s2.(uint)
 		}, func(i, j int, src interface{}) {
 			arr := src.([]uint)
+			arr[i], arr[j] = arr[j], arr[i]
+		},
+		nil,
+	)
+	// Uint8ItemsCreator ...
+	Uint8ItemsCreator = ReflectItemsCreator(
+		func(s1, s2 interface{}) bool {
+			return s1.(uint8) < s2.(uint8)
+		}, func(i, j int, src interface{}) {
+			arr := src.([]uint8)
+			arr[i], arr[j] = arr[j], arr[i]
+		},
+		nil,
+	)
+	// Uint16ItemsCreator ...
+	Uint16ItemsCreator = ReflectItemsCreator(
+		func(s1, s2 interface{}) bool {
+			return s1.(uint16) < s2.(uint16)
+		}, func(i, j int, src interface{}) {
+			arr := src.([]uint16)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
 		nil,
