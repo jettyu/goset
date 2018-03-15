@@ -1,6 +1,8 @@
 package goset
 
-import "sort"
+import (
+	"sort"
+)
 
 type set struct {
 	items Items
