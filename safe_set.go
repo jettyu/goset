@@ -71,3 +71,10 @@ func (p *safeSet) Get(v interface{}) (data interface{}, ok bool) {
 	p.RUnlock()
 	return
 }
+
+func (p *safeSet) Len() int {
+	p.RLock()
+	n := p.set.Len()
+	p.RUnlock()
+	return n
+}

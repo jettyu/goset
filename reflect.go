@@ -301,6 +301,10 @@ func (p reflectSet) Get(id interface{}) (data interface{}, ok bool) {
 	return
 }
 
+func (p reflectSet) Len() int {
+	return p.items.Len()
+}
+
 // SliceElement ...
 type reflectElement struct {
 	v         interface{}

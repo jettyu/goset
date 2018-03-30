@@ -116,3 +116,7 @@ func (p set) Get(v interface{}) (data interface{}, ok bool) {
 	ok = p.items.Elem(pos).Equal(v.(Element))
 	return
 }
+
+func (p set) Len() int {
+	return p.items.Len()
+}

@@ -25,6 +25,7 @@ type Set interface {
 	Has(v interface{}, pos int) bool
 	Insert(v Items) int
 	Erase(v Items) int
+	Len() int
 	Items() Items
 	Value() interface{}
 	Search(v interface{}, pos int) int
