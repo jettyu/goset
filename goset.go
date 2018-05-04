@@ -23,8 +23,8 @@ type Items interface {
 // Set ...
 type Set interface {
 	Has(v interface{}, pos int) bool
-	Insert(v Items) int
-	Erase(v Items) int
+	Insert(v ...interface{}) int
+	Erase(v ...interface{}) int
 	Len() int
 	Items() Items
 	Value() interface{}

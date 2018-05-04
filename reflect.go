@@ -218,7 +218,31 @@ func (p reflectSet) Has(v interface{}, pos int) bool {
 	return true
 }
 
-func (p *reflectSet) Insert(it Items) (insertNum int) {
+func (p *reflectSet) Insert(v ...interface{}) (intsertNum int) {
+	for _, arg := range v {
+		items, ok := arg.(Items)
+		if ok {
+			intsertNum += p.InsertItems(items)
+		} else {
+			intsertNum += p.insertElem(arg)
+		}
+	}
+	return
+}
+
+func (p *reflectSet) Erase(v ...interface{}) (eraseNum int) {
+	for _, arg := range v {
+		items, ok := arg.(Items)
+		if ok {
+			eraseNum += p.EraseItems(items)
+		} else {
+			eraseNum += p.eraseElem(arg)
+		}
+	}
+	return
+}
+
+func (p *reflectSet) InsertItems(it Items) (insertNum int) {
 	items := it.(reflectItems)
 	if !sort.IsSorted(items) {
 		sort.Sort(items)
@@ -255,7 +279,7 @@ func (p *reflectSet) Insert(it Items) (insertNum int) {
 	return
 }
 
-func (p *reflectSet) Erase(it Items) (eraseNum int) {
+func (p *reflectSet) EraseItems(it Items) (eraseNum int) {
 	items := it.(reflectItems)
 	if p.items.Len() == 0 {
 		return
@@ -303,6 +327,47 @@ func (p reflectSet) Get(id interface{}) (data interface{}, ok bool) {
 
 func (p reflectSet) Len() int {
 	return p.items.Len()
+}
+
+// InsertElem ...
+func (p *reflectSet) insertElem(v interface{}) int {
+	if p.items.Len() == 0 {
+		p.items = p.items.append(v)
+		return 1
+	}
+	pos := p.Search(v, 0)
+	n := pos
+	if pos < p.items.Len() {
+		e := p.items.elem(pos)
+		if p.items.equalFunc(e, v) {
+			// has v
+			return 0
+		} else if p.items.lessFunc(e, v) {
+			// less than v, insert after e
+			n++
+		}
+	} else {
+		pos--
+	}
+	p.items = p.items.append(v)
+	p.items.Move(pos+1, pos, p.items.Len()-(pos+1))
+	p.items.setElem(v, n)
+	return 1
+}
+
+func (p *reflectSet) eraseElem(v interface{}) int {
+	if p.items.Len() == 0 {
+		return 0
+	}
+
+	pos := p.Search(v, 0)
+	if pos == p.items.Len() || !p.items.equalFunc(p.items.elem(pos), v) {
+		return 0
+	}
+	p.items.Move(pos, pos+1, p.items.Len()-(pos+1))
+	p.items = p.items.truncate(p.items.Len() - 1)
+
+	return 1
 }
 
 // SliceElement ...

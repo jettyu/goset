@@ -23,16 +23,16 @@ func (p *safeSet) Has(v interface{}, pos int) bool {
 	return ok
 }
 
-func (p *safeSet) Insert(v Items) int {
+func (p *safeSet) Insert(v ...interface{}) int {
 	p.Lock()
-	n := p.set.Insert(v)
+	n := p.set.Insert(v...)
 	p.Unlock()
 	return n
 }
 
-func (p *safeSet) Erase(v Items) int {
+func (p *safeSet) Erase(v ...interface{}) int {
 	p.Lock()
-	n := p.set.Erase(v)
+	n := p.set.Erase(v...)
 	p.Unlock()
 	return n
 }
