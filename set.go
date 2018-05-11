@@ -1,6 +1,7 @@
 package goset
 
 import (
+	"reflect"
 	"sort"
 )
 
@@ -186,4 +187,12 @@ func (p *set) eraseElem(e Element) int {
 	p.items = p.items.Truncate(p.items.Len() - 1)
 
 	return 1
+}
+
+func (p set) Clone() Set {
+	items := reflect.Zero(reflect.TypeOf(p.items)).Interface().(Items)
+	for i := 0; i < p.items.Len(); i++ {
+		items = items.Append(p.items.Elem(i))
+	}
+	return &set{items: items}
 }

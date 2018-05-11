@@ -13,6 +13,15 @@ func TestReflect(t *testing.T) {
 	if !goset.Equal(s.Items(), goset.UintItemsCreator([]uint{1, 2, 3, 4, 5, 6})) {
 		t.Fatal(s.Value())
 	}
+	clone := s.Clone()
+	if !s.Equal(clone.Items()) {
+		t.Fatal(clone.Value())
+	}
+	s.Erase(uint(5))
+	if s.Equal(clone.Items()) {
+		t.Fatal(clone.Value(), s.Value())
+	}
+	t.Log(s.Value(), clone.Value())
 }
 
 func TestReflectStruct(t *testing.T) {
@@ -133,6 +142,7 @@ func TestReflectStruct1(t *testing.T) {
 	}
 	// erase by id
 	s := goset.NewSet(items1)
+
 	s.Erase(goset.StringsItemsCreator([]string{"c"}))
 	t.Log(s.Value())
 	// intersection by id

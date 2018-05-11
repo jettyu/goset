@@ -501,3 +501,11 @@ func (p reflectItems) intersection(it Items) (dst reflectItems) {
 	}
 	return
 }
+
+func (p *reflectSet) Clone() Set {
+	items := p.items.truncate(0)
+	items.rv = reflect.AppendSlice(reflect.Zero(p.items.rv.Type()), p.items.rv)
+	return &reflectSet{
+		items: items,
+	}
+}

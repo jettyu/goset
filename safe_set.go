@@ -78,3 +78,10 @@ func (p *safeSet) Len() int {
 	p.RUnlock()
 	return n
 }
+
+func (p *safeSet) Clone() Set {
+	p.RLock()
+	s := p.set.Clone()
+	p.RUnlock()
+	return s
+}

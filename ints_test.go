@@ -26,6 +26,7 @@ func TestInts(t *testing.T) {
 	if s.Insert(goset.IntSlice([]int{1, 5, 7, 8})) != 2 {
 		t.Fatal(s)
 	}
+
 	if s.Erase(goset.IntSlice([]int{7, 9})) != 1 {
 		t.Fatal(s)
 	}
@@ -38,6 +39,16 @@ func TestInts(t *testing.T) {
 	if !s.Equal(goset.IntSlice([]int{2, 3, 4, 5})) {
 		t.Fatal(s.Items())
 	}
+
+	clone := s.Clone()
+	if !s.Equal(clone.Items()) {
+		t.Fatal(clone.Value())
+	}
+	s.Erase(goset.IntElement(5))
+	if s.Equal(clone.Items()) {
+		t.Fatal(clone.Value(), s.Value())
+	}
+	t.Log(s.Value(), clone.Value())
 }
 
 func TestUnion(t *testing.T) {
