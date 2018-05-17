@@ -74,9 +74,7 @@ func TestReflectStruct(t *testing.T) {
 		t.Fatal(userSet.Value())
 	}
 	// erase {"c",5}
-	if userSet.Erase([]reflectUser{
-		{"c", 5},
-	}) != 1 {
+	if userSet.Erase(reflectUser{"c", 5}) != 1 {
 		t.Fatal(userSet.Value())
 	}
 	// not has {"c", 5}
