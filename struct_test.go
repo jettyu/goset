@@ -7,7 +7,7 @@ import (
 )
 
 func TestStruct(t *testing.T) {
-	users := []User{
+	users := Users{
 		{"a", 1},
 		{"b", 10},
 		{"d", 1},
@@ -15,16 +15,16 @@ func TestStruct(t *testing.T) {
 		{"b", 10},
 		{"e", 2},
 	}
-	userSet := goset.NewSet(Users(users))
+	userSet := goset.NewSet(goset.NewItems(users))
 	// [{a 1} {d 1} {e 2} {c 5} {b 10}]
 	t.Log(userSet.Value().(Users))
-	if !goset.Equal(userSet, goset.NewSet(Users{
+	if !goset.Equal(userSet, goset.NewSet(goset.NewItems(Users{
 		{"a", 1},
 		{"d", 1},
 		{"e", 2},
 		{"c", 5},
 		{"b", 10},
-	}, true)) {
+	}), true)) {
 		t.Fatal(userSet.Items())
 	}
 }
@@ -55,18 +55,8 @@ func (p User) Equal(e goset.Element) bool {
 // Users ...
 type Users []User
 
-var _ goset.Items = Users(nil)
+var _ goset.Items = goset.NewItems(Users{})
 
-func (p Users) Len() int                       { return len(p) }
-func (p Users) Less(i, j int) bool             { return p[i].Less(p[j]) }
-func (p Users) Swap(i, j int)                  { p[i], p[j] = p[j], p[i] }
-func (p Users) Elem(i int) goset.Element       { return p[i] }
-func (p Users) SetElem(e goset.Element, i int) { p[i] = e.(User) }
-func (p Users) Move(dstPos, srcPos, n int)     { copy(p[dstPos:dstPos+n], p[srcPos:srcPos+n]) }
-func (p Users) Truncate(n int) goset.Items     { return p[:n] }
-func (p Users) Append(e ...goset.Element) goset.Items {
-	for _, v := range e {
-		p = append(p, v.(User))
-	}
-	return p
-}
+func (p Users) Len() int           { return len(p) }
+func (p Users) Less(i, j int) bool { return p[i].Less(p[j]) }
+func (p Users) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }

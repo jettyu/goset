@@ -131,6 +131,10 @@ func (p set) Items() Items {
 }
 
 func (p set) Value() interface{} {
+	v, ok := p.items.(ReflectValue)
+	if ok {
+		return v.Value()
+	}
 	return p.items
 }
 
