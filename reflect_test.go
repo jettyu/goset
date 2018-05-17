@@ -11,15 +11,15 @@ func TestReflect(t *testing.T) {
 	uintitems := goset.UintItemsCreator([]uint{5, 1, 2, 4, 2, 6, 4, 3})
 	s := goset.NewSet(uintitems)
 	t.Log(s.Value().([]uint))
-	if !goset.Equal(s.Items(), goset.UintItemsCreator([]uint{1, 2, 3, 4, 5, 6})) {
+	if !goset.Equal(s, goset.Uints([]uint{1, 2, 3, 4, 5, 6})) {
 		t.Fatal(s.Value())
 	}
 	clone := s.Clone()
-	if !s.Equal(clone.Items()) {
+	if !s.Equal(clone.Value()) {
 		t.Fatal(clone.Value())
 	}
 	s.Erase(uint(5))
-	if s.Equal(clone.Items()) {
+	if s.Equal(clone.Value()) {
 		t.Fatal(clone.Value(), s.Value())
 	}
 	t.Log(s.Value(), clone.Value())
@@ -60,13 +60,13 @@ func TestReflectStruct(t *testing.T) {
 	userSet := goset.NewSet(items1)
 	// [{a 1} {d 1} {e 2} {c 5} {b 10}]
 	t.Log(userSet.Value().([]reflectUser))
-	if !goset.Equal(userSet.Items(), reflectUserItemsCreator([]reflectUser{
+	if !goset.Equal(userSet, goset.NewSet(reflectUserItemsCreator([]reflectUser{
 		{"a", 1},
 		{"d", 1},
 		{"e", 2},
 		{"c", 5},
 		{"b", 10},
-	})) {
+	}))) {
 		t.Fatal(userSet.Value())
 	}
 	// has {"c",5}
@@ -122,9 +122,9 @@ func TestReflectStruct1(t *testing.T) {
 			}
 			return s1.(reflectUser).ID == s2.(string)
 		})
-	idItems := goset.StringsItemsCreator([]string{"a", "d", "e", "c", "b"})
-	if !goset.Equal(items1, idItems) {
-		t.Fatal(items1.(goset.ReflectValue).Value())
+	idItems := goset.Strings([]string{"a", "d", "e", "c", "b"}, true)
+	if !goset.Equal(goset.NewSet(items1), idItems) {
+		t.Fatal(items1.Value())
 	}
 	items1 = items1.WithFunc(func(s1, s2 interface{}) bool {
 		u, ok := s2.(reflectUser)
@@ -147,10 +147,10 @@ func TestReflectStruct1(t *testing.T) {
 	s.Erase(goset.StringsItemsCreator([]string{"c"}))
 	t.Log(s.Value())
 	// intersection by id
-	idItems = goset.StringsItemsCreator([]string{"b", "d", "c"})
-	insItems := goset.Intersection(items1, idItems)
-	if !goset.Equal(insItems, goset.StringsItemsCreator([]string{"b", "d"})) {
-		t.Fatal(insItems.(goset.ReflectItems).Value())
+	idItems = goset.Strings([]string{"b", "d", "c"})
+	insItems := goset.Intersection(s, idItems)
+	if !goset.Equal(insItems, goset.Strings([]string{"b", "d"})) {
+		t.Fatal(insItems.Value())
 	}
 }
 

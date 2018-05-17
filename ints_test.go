@@ -48,41 +48,40 @@ func TestInts(t *testing.T) {
 	if s.Equal(clone.Items()) {
 		t.Fatal(clone.Value(), s.Value())
 	}
-	t.Log(s.Value(), clone.Value())
 }
 
 func TestUnion(t *testing.T) {
 	arr1 := []int{0, 2, 4, 5}
 	arr2 := []int{1, 2, 3, 5, 6}
 
-	it3 := goset.Union(goset.IntItemsCreator(arr1), goset.IntItemsCreator(arr2))
+	it3 := goset.Union(goset.Ints(arr1), goset.Ints(arr2))
 	except := []int{0, 1, 2, 3, 4, 5, 6}
-	if !goset.Equal(it3, goset.IntItemsCreator(except)) {
-		t.Fatal(it3.(goset.ReflectValue).Value())
+	if !goset.Equal(it3, goset.Ints(except)) {
+		t.Fatal(it3.Value())
 	}
 }
 
 func TestIntersection(t *testing.T) {
 	arr1 := []int{0, 2, 4, 5}
 	arr2 := []int{1, 2, 3, 5, 6}
-	it3 := goset.Intersection(goset.IntItemsCreator(arr1), goset.IntItemsCreator(arr2))
+	it3 := goset.Intersection(goset.Ints(arr1), goset.Ints(arr2))
 	except := []int{2, 5}
 
-	if !goset.Equal(it3, goset.IntItemsCreator(except)) {
-		t.Fatal(it3.(goset.ReflectValue).Value())
+	if !goset.Equal(it3, goset.Ints(except)) {
+		t.Fatal(it3.Value())
 	}
 }
 
 func TestDifference(t *testing.T) {
 	arr1 := []int{0, 2, 4, 5}
 	arr2 := []int{1, 2, 3, 5, 6}
-	it3 := goset.Difference(goset.IntItemsCreator(arr1), goset.IntItemsCreator(arr2))
+	it3 := goset.Difference(goset.Ints(arr1), goset.Ints(arr2))
 	except := []int{0, 1, 3, 4, 6}
 	if it3.Len() != len(except) {
 		t.Fatal(it3)
 	}
 
-	if !goset.Equal(it3, goset.IntItemsCreator(except)) {
-		t.Fatal(it3.(goset.ReflectValue).Value())
+	if !goset.Equal(it3, goset.Ints(except)) {
+		t.Fatal(it3.Value())
 	}
 }

@@ -135,7 +135,10 @@ func (p set) Value() interface{} {
 }
 
 func (p set) Equal(slice interface{}) bool {
-	return Equal(p.items, slice.(Items))
+	if it, ok := slice.(Items); ok {
+		return Equal(&p, &set{it})
+	}
+	return Equal(&p, slice.(Set))
 }
 
 func (p set) Get(v interface{}) (data interface{}, ok bool) {

@@ -35,14 +35,16 @@ type Set interface {
 }
 
 // Equal ...
-func Equal(it1, it2 Items) bool {
-	rit, ok := it1.(reflectItems)
+func Equal(s1, s2 Set) bool {
+	rit, ok := s1.(*reflectSet)
 	if ok {
-		return rit.equal(it2)
+		return rit.Equal(s2.Value())
 	}
-	if it1.Len() != it2.Len() {
+	if s1.Len() != s2.Len() {
 		return false
 	}
+	it1 := s1.Items()
+	it2 := s2.Items()
 	for i := 0; i < it1.Len(); i++ {
 		if !it1.Elem(i).Equal(it2.Elem(i)) {
 			return false
@@ -52,25 +54,24 @@ func Equal(it1, it2 Items) bool {
 }
 
 // Union ...
-func Union(it1, it2 Items) Items {
-	s := NewSet(it1)
-	s.Insert(it2)
-	return s.Items()
+func Union(s1, s2 Set) Set {
+	s := s1.Clone()
+	s.Insert(s2.Value())
+	return s
 }
 
 // Intersection ...
-func Intersection(it1, it2 Items) (dst Items) {
-	rit, ok := it1.(reflectItems)
+func Intersection(s1, s2 Set) Set {
+	rit, ok := s1.(*reflectSet)
 	if ok {
-		return rit.intersection(it2)
+		return NewSet(rit.items.intersection(s2.(*reflectSet).items), true)
 	}
-	dst = it1.Truncate(0)
+	it1 := s1.Items()
+	it2 := s2.Items()
+	dst := it1.Truncate(0)
 	if it1.Len() == 0 || it2.Len() == 0 {
-		return
+		return NewSet(dst, true)
 	}
-
-	s1 := NewSet(it1)
-	s2 := NewSet(it2)
 	it1 = s1.Items()
 	it2 = s2.Items()
 	pos := 0
@@ -87,12 +88,12 @@ func Intersection(it1, it2 Items) (dst Items) {
 		}
 	}
 
-	return
+	return NewSet(dst, true)
 }
 
 // Difference ...
-func Difference(it1, it2 Items) (dst Items) {
-	s := NewSet(Union(it1, it2))
-	s.Erase(Intersection(it1, it2))
-	return s.Items()
+func Difference(s1, s2 Set) Set {
+	s := Union(s1, s2)
+	s.Erase(Intersection(s1, s2).Value())
+	return s
 }
