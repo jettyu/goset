@@ -58,9 +58,9 @@ func (p *safeSet) Search(v interface{}, pos int) int {
 	return i
 }
 
-func (p *safeSet) Equal(v Items) bool {
+func (p *safeSet) Equal(slice interface{}) bool {
 	p.RLock()
-	ok := p.set.Equal(v)
+	ok := p.set.Equal(slice)
 	p.RUnlock()
 	return ok
 }

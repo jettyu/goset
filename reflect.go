@@ -19,28 +19,32 @@ type ReflectItems interface {
 }
 
 var (
+	// Strings ...
+	Strings = func(arr []string, sorted ...bool) Set { return NewSet(StringsItemsCreator(arr), sorted...) }
+	// Ints ...
+	Ints = func(arr []int, sorted ...bool) Set { return NewSet(IntItemsCreator(arr), sorted...) }
 	// Int8s ...
-	Int8s = func(arr []int8) Set { return NewSet(Int8ItemsCreator(arr)) }
+	Int8s = func(arr []int8, sorted ...bool) Set { return NewSet(Int8ItemsCreator(arr), sorted...) }
 	// Int16s ...
-	Int16s = func(arr []int16) Set { return NewSet(Int16ItemsCreator(arr)) }
+	Int16s = func(arr []int16, sorted ...bool) Set { return NewSet(Int16ItemsCreator(arr), sorted...) }
 	// Int32s ...
-	Int32s = func(arr []int32) Set { return NewSet(Int32ItemsCreator(arr)) }
+	Int32s = func(arr []int32, sorted ...bool) Set { return NewSet(Int32ItemsCreator(arr), sorted...) }
 	// Int64s ...
-	Int64s = func(arr []int64) Set { return NewSet(Int64ItemsCreator(arr)) }
+	Int64s = func(arr []int64, sorted ...bool) Set { return NewSet(Int64ItemsCreator(arr), sorted...) }
 	// Uints ...
-	Uints = func(arr []uint) Set { return NewSet(UintItemsCreator(arr)) }
+	Uints = func(arr []uint, sorted ...bool) Set { return NewSet(UintItemsCreator(arr), sorted...) }
 	// Uint8s ...
-	Uint8s = func(arr []uint8) Set { return NewSet(Uint8ItemsCreator(arr)) }
+	Uint8s = func(arr []uint8, sorted ...bool) Set { return NewSet(Uint8ItemsCreator(arr), sorted...) }
 	// Uint16s ...
-	Uint16s = func(arr []uint16) Set { return NewSet(Uint16ItemsCreator(arr)) }
+	Uint16s = func(arr []uint16, sorted ...bool) Set { return NewSet(Uint16ItemsCreator(arr), sorted...) }
 	// Uint32s ...
-	Uint32s = func(arr []uint32) Set { return NewSet(Uint32ItemsCreator(arr)) }
+	Uint32s = func(arr []uint32, sorted ...bool) Set { return NewSet(Uint32ItemsCreator(arr), sorted...) }
 	// Uint64s ...
-	Uint64s = func(arr []uint64) Set { return NewSet(Uint64ItemsCreator(arr)) }
+	Uint64s = func(arr []uint64, sorted ...bool) Set { return NewSet(Uint64ItemsCreator(arr), sorted...) }
 	// Float32s ...
-	Float32s = func(arr []float32) Set { return NewSet(Float32ItemsCreator(arr)) }
+	Float32s = func(arr []float32, sorted ...bool) Set { return NewSet(Float32ItemsCreator(arr), sorted...) }
 	// Float64s ...
-	Float64s = func(arr []float64) Set { return NewSet(Float64ItemsCreator(arr)) }
+	Float64s = func(arr []float64, sorted ...bool) Set { return NewSet(Float64ItemsCreator(arr)) }
 )
 
 var (
@@ -51,11 +55,19 @@ var (
 	) func(slice interface{}) ReflectItems {
 		return func(slice interface{}) ReflectItems {
 			rv := reflect.ValueOf(slice)
+			if swapFunc == nil {
+				swapFunc = func(i, j int, src interface{}) {
+					v := rv.Index(i).Interface()
+					rv.Index(i).Set(rv.Index(j))
+					rv.Index(j).Set(reflect.ValueOf(v))
+				}
+			}
 			if equalFunc == nil {
 				equalFunc = func(s1, s2 interface{}) bool {
 					return reflect.DeepEqual(s1, s2)
 				}
 			}
+
 			return reflectItems{
 				rv:        rv,
 				lessFunc:  lessFunc,
@@ -72,7 +84,9 @@ var (
 			arr := src.([]string)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(string) == s2.(string)
+		},
 	)
 	// IntItemsCreator ...
 	IntItemsCreator = ReflectItemsCreator(
@@ -82,7 +96,9 @@ var (
 			arr := src.([]int)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(int) == s2.(int)
+		},
 	)
 	// Int8ItemsCreator ...
 	Int8ItemsCreator = ReflectItemsCreator(
@@ -92,7 +108,9 @@ var (
 			arr := src.([]int8)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(int8) == s2.(int8)
+		},
 	)
 	// Int16ItemsCreator ...
 	Int16ItemsCreator = ReflectItemsCreator(
@@ -102,7 +120,9 @@ var (
 			arr := src.([]int16)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(int16) == s2.(int16)
+		},
 	)
 	// Int32ItemsCreator ...
 	Int32ItemsCreator = ReflectItemsCreator(
@@ -112,7 +132,9 @@ var (
 			arr := src.([]int32)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(int32) == s2.(int32)
+		},
 	)
 	// Int64ItemsCreator ...
 	Int64ItemsCreator = ReflectItemsCreator(
@@ -122,7 +144,9 @@ var (
 			arr := src.([]int64)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(int64) == s2.(int64)
+		},
 	)
 	// UintItemsCreator ...
 	UintItemsCreator = ReflectItemsCreator(
@@ -132,7 +156,9 @@ var (
 			arr := src.([]uint)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(uint) == s2.(uint)
+		},
 	)
 	// Uint8ItemsCreator ...
 	Uint8ItemsCreator = ReflectItemsCreator(
@@ -142,7 +168,9 @@ var (
 			arr := src.([]uint8)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(uint8) == s2.(uint8)
+		},
 	)
 	// Uint16ItemsCreator ...
 	Uint16ItemsCreator = ReflectItemsCreator(
@@ -152,7 +180,9 @@ var (
 			arr := src.([]uint16)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(uint16) == s2.(uint16)
+		},
 	)
 	// Uint32ItemsCreator ...
 	Uint32ItemsCreator = ReflectItemsCreator(
@@ -162,7 +192,9 @@ var (
 			arr := src.([]uint32)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(uint32) == s2.(uint32)
+		},
 	)
 	// Uint64ItemsCreator ...
 	Uint64ItemsCreator = ReflectItemsCreator(
@@ -172,7 +204,9 @@ var (
 			arr := src.([]uint64)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(uint64) == s2.(uint64)
+		},
 	)
 	// Float32ItemsCreator ...
 	Float32ItemsCreator = ReflectItemsCreator(
@@ -182,7 +216,9 @@ var (
 			arr := src.([]float32)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(float32) == s2.(float32)
+		},
 	)
 	// Float64ItemsCreator ...
 	Float64ItemsCreator = ReflectItemsCreator(
@@ -192,7 +228,9 @@ var (
 			arr := src.([]float64)
 			arr[i], arr[j] = arr[j], arr[i]
 		},
-		nil,
+		func(s1, s2 interface{}) bool {
+			return s1.(float64) == s2.(float64)
+		},
 	)
 )
 
@@ -219,25 +257,46 @@ func (p reflectSet) Has(v interface{}, pos int) bool {
 }
 
 func (p *reflectSet) Insert(v ...interface{}) (intsertNum int) {
-	for _, arg := range v {
-		items, ok := arg.(Items)
-		if ok {
+	if len(v) == 1 {
+		if items, ok := v[0].(Items); ok {
 			intsertNum += p.InsertItems(items)
-		} else {
-			intsertNum += p.insertElem(arg)
+			return
 		}
+		rv := reflect.ValueOf(v[0])
+		if rv.Kind() == reflect.Slice {
+			for i := 0; i < rv.Len(); i++ {
+				intsertNum += p.insertElem(rv.Index(i).Interface())
+			}
+			return
+		}
+		intsertNum += p.insertElem(v[0])
+		return
 	}
+	for _, arg := range v {
+		intsertNum += p.insertElem(arg)
+	}
+
 	return
 }
 
 func (p *reflectSet) Erase(v ...interface{}) (eraseNum int) {
-	for _, arg := range v {
-		items, ok := arg.(Items)
-		if ok {
+	if len(v) == 1 {
+		if items, ok := v[0].(Items); ok {
 			eraseNum += p.EraseItems(items)
-		} else {
-			eraseNum += p.eraseElem(arg)
+			return
 		}
+		rv := reflect.ValueOf(v[0])
+		if rv.Kind() == reflect.Slice {
+			for i := 0; i < rv.Len(); i++ {
+				eraseNum += p.eraseElem(rv.Index(i).Interface())
+			}
+			return
+		}
+		eraseNum += p.eraseElem(v[0])
+		return
+	}
+	for _, arg := range v {
+		eraseNum += p.eraseElem(arg)
 	}
 	return
 }
@@ -311,8 +370,8 @@ func (p reflectSet) Value() interface{} {
 	return p.items.Value()
 }
 
-func (p reflectSet) Equal(items Items) bool {
-	return p.items.equal(items)
+func (p reflectSet) Equal(slice interface{}) bool {
+	return p.items.equal(slice)
 }
 
 func (p reflectSet) Get(id interface{}) (data interface{}, ok bool) {
@@ -461,16 +520,18 @@ func (p reflectItems) truncate(n int) reflectItems {
 	p.rv = p.rv.Slice(0, n)
 	return p
 }
-func (p reflectItems) equal(it Items) bool {
-	items, ok := it.(reflectItems)
-	if !ok {
-		return false
+func (p reflectItems) equal(slice interface{}) bool {
+	var rv reflect.Value
+	if items, ok := slice.(reflectItems); ok {
+		rv = items.rv
+	} else {
+		rv = reflect.ValueOf(slice)
 	}
-	if p.Len() != items.Len() {
+	if p.Len() != rv.Len() {
 		return false
 	}
 	for i := 0; i < p.Len(); i++ {
-		if !p.equalFunc(p.rv.Index(i).Interface(), items.rv.Index(i).Interface()) {
+		if !p.equalFunc(p.rv.Index(i).Interface(), rv.Index(i).Interface()) {
 			return false
 		}
 	}

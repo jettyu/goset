@@ -1,6 +1,7 @@
 package goset_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/jettyu/goset"
@@ -73,9 +74,9 @@ func TestReflectStruct(t *testing.T) {
 		t.Fatal(userSet.Value())
 	}
 	// erase {"c",5}
-	if userSet.Erase(reflectUserItemsCreator([]reflectUser{
+	if userSet.Erase([]reflectUser{
 		{"c", 5},
-	})) != 1 {
+	}) != 1 {
 		t.Fatal(userSet.Value())
 	}
 	// not has {"c", 5}
@@ -166,26 +167,38 @@ func BenchmarkInts(b *testing.B) {
 	}
 }
 
-func BenchmarkEqual(b *testing.B) {
-	arr := []int{1, 5, 2, 3, 3, 4}
-	exp := []int{1, 2, 3, 4, 5}
-	items := goset.Ints(arr).Items()
-	expItems := goset.IntSlice(exp)
+func BenchmarkSwap(b *testing.B) {
+	creator := goset.ReflectItemsCreator(nil, nil, nil)
+	arr := []int{1, 2}
+	items := creator(arr)
 	for i := 0; i < b.N; i++ {
-		if !goset.Equal(items, expItems) {
-			b.Fatal(items)
-		}
+		items.Swap(0, 1)
 	}
 }
 
-func BenchmarkReflectEqual(b *testing.B) {
-	arr := []int{1, 5, 2, 3, 3, 4}
-	exp := []int{1, 2, 3, 4, 5}
-	items := goset.NewSet(goset.IntItemsCreator(arr)).Items()
-	expItems := goset.IntItemsCreator(exp)
+func BenchmarkSwap1(b *testing.B) {
+	creator := goset.ReflectItemsCreator(nil, func(i, j int, src interface{}) {
+		s := src.([]int)
+		s[i], s[j] = s[j], s[i]
+	}, nil)
+	arr := []int{1, 2}
+	items := creator(arr)
 	for i := 0; i < b.N; i++ {
-		if !goset.Equal(items, expItems) {
-			b.Fatal(items)
-		}
+		items.Swap(0, 1)
+	}
+}
+func BenchmarkEqualFunc(b *testing.B) {
+	f := func(i, j interface{}) bool { return reflect.DeepEqual(i, j) }
+	for i := 0; i < b.N; i++ {
+		f(0, 0)
+	}
+}
+
+func BenchmarkEqualFunc1(b *testing.B) {
+	f := func(i, j interface{}) bool {
+		return i.(int) == j.(int)
+	}
+	for i := 0; i < b.N; i++ {
+		f(0, 0)
 	}
 }

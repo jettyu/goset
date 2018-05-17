@@ -29,7 +29,7 @@ type Set interface {
 	Items() Items
 	Value() interface{}
 	Search(v interface{}, pos int) int
-	Equal(Items) bool
+	Equal(slice interface{}) bool
 	Get(v interface{}) (data interface{}, ok bool)
 	Clone() Set
 }

@@ -12,11 +12,17 @@ type set struct {
 var _ Set = (*set)(nil)
 
 // NewSet ...
-func NewSet(items Items) (s Set) {
+func NewSet(items Items, sorted ...bool) (s Set) {
 	rit, ok := items.(reflectItems)
 	if ok {
+		if len(sorted) > 0 && sorted[0] {
+			return &reflectSet{rit}
+		}
 		s = &reflectSet{rit.truncate(0)}
 	} else {
+		if len(sorted) > 0 && sorted[0] {
+			return &set{items}
+		}
 		s = &set{items.Truncate(0)}
 	}
 	s.Insert(items)
@@ -128,8 +134,8 @@ func (p set) Value() interface{} {
 	return p.items
 }
 
-func (p set) Equal(items Items) bool {
-	return Equal(p.items, items)
+func (p set) Equal(slice interface{}) bool {
+	return Equal(p.items, slice.(Items))
 }
 
 func (p set) Get(v interface{}) (data interface{}, ok bool) {
