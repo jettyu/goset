@@ -1,7 +1,6 @@
 package goset
 
 import (
-	"reflect"
 	"sort"
 )
 
@@ -25,6 +24,7 @@ func NewSet(items Items, sorted ...bool) (s Set) {
 		}
 		s = &set{items.Truncate(0)}
 	}
+	// s = s.Clone()
 	s.Insert(items)
 	return s
 }
@@ -203,13 +203,5 @@ func (p *set) eraseElem(e Element) int {
 }
 
 func (p set) Clone() Set {
-	v := reflect.ValueOf(p.items)
-	rv := reflect.MakeSlice(v.Type(), v.Len(), v.Cap())
-	reflect.Copy(rv, v)
-	items := rv.Interface().(Items)
-	// items := reflect.Zero(reflect.TypeOf(p.items)).Interface().(Items)
-	// for i := 0; i < p.items.Len(); i++ {
-	// 	items = items.Append(p.items.Elem(i))
-	// }
-	return &set{items: items}
+	return &set{items: ItemsClone(p.items)}
 }

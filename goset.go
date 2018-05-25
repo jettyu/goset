@@ -1,6 +1,7 @@
 package goset
 
 import (
+	"reflect"
 	"sort"
 )
 
@@ -18,6 +19,23 @@ type Items interface {
 	Move(dstPos, srcPos, n int)
 	Append(e ...Element) Items
 	Truncate(n int) Items
+}
+
+// ItemsCloner ...
+type ItemsCloner interface {
+	Clone() Items
+}
+
+// ItemsClone ...
+func ItemsClone(items Items) Items {
+	cloner, ok := items.(ItemsCloner)
+	if ok {
+		return cloner.Clone()
+	}
+	v := reflect.ValueOf(items)
+	rv := reflect.MakeSlice(v.Type(), v.Len(), v.Len())
+	reflect.Copy(rv, v)
+	return rv.Interface().(Items)
 }
 
 // Set ...

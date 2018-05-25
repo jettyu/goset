@@ -496,6 +496,14 @@ func (p reflectItems) Truncate(n int) Items {
 	return p.truncate(n)
 }
 
+func (p reflectItems) Clone() Items {
+	rv := reflect.MakeSlice(p.rv.Type(), p.rv.Len(), p.rv.Len())
+	reflect.Copy(rv, p.rv)
+	items := p
+	items.rv = rv
+	return items
+}
+
 func (p reflectItems) WithFunc(lessFunc,
 	equalFunc func(s1, s2 interface{}) bool) ReflectItems {
 	if lessFunc != nil {
@@ -564,11 +572,7 @@ func (p reflectItems) intersection(it Items) (dst reflectItems) {
 }
 
 func (p *reflectSet) Clone() Set {
-	rv := reflect.MakeSlice(p.items.rv.Type(), p.items.rv.Len(), p.items.rv.Cap())
-	reflect.Copy(rv, p.items.rv)
-	items := p.items
-	items.rv = rv
 	return &reflectSet{
-		items: items,
+		items: p.items.Clone().(reflectItems),
 	}
 }
