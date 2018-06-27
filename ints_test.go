@@ -62,10 +62,10 @@ func TestUnion(t *testing.T) {
 }
 
 func TestIntersection(t *testing.T) {
-	arr1 := []int{0, 2, 4, 5}
-	arr2 := []int{1, 2, 3, 5, 6}
+	arr1 := []int{0, 1, 1, 2, 2, 4, 5}
+	arr2 := []int{1, 1, 2, 2, 3, 5, 6}
 	it3 := goset.Intersection(goset.Ints(arr1), goset.Ints(arr2))
-	except := []int{2, 5}
+	except := []int{1, 2, 5}
 
 	if !goset.Equal(it3, goset.Ints(except)) {
 		t.Fatal(it3.Value())

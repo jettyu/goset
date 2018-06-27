@@ -312,9 +312,9 @@ func (p *reflectSet) InsertItems(it Items) (insertNum int) {
 		if p.items.Len() == 0 {
 			p.items = p.items.append(v)
 			insertNum++
-			pos++
 			continue
 		}
+
 		pos += p.Search(v, pos)
 		n := pos
 		if pos < p.items.Len() {

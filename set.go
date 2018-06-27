@@ -78,9 +78,9 @@ func (p *set) InsertItems(items Items) (insertNum int) {
 		if p.items.Len() == 0 {
 			p.items = p.items.Append(v)
 			insertNum++
-			pos++
 			continue
 		}
+
 		pos += p.Search(v, pos)
 		n := pos
 		if pos < p.items.Len() {
@@ -99,6 +99,9 @@ func (p *set) InsertItems(items Items) (insertNum int) {
 		p.items = p.items.Append(v)
 		p.items.Move(pos+1, pos, p.items.Len()-(pos+1))
 		p.items.SetElem(v, n)
+		if pos > 0 {
+			pos--
+		}
 	}
 
 	return
