@@ -85,3 +85,17 @@ func TestDifference(t *testing.T) {
 		t.Fatal(it3.Value())
 	}
 }
+
+func TestSubstract(t *testing.T) {
+	arr1 := []int{0, 2, 4, 5}
+	arr2 := []int{1, 2, 3, 5, 6}
+	it3 := goset.Subtract(goset.Ints(arr1), goset.Ints(arr2))
+	except := []int{0, 4}
+	if it3.Len() != len(except) {
+		t.Fatal(it3.Value())
+	}
+
+	if !goset.Equal(it3, goset.Ints(except)) {
+		t.Fatal(it3.Value())
+	}
+}

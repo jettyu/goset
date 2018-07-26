@@ -115,3 +115,10 @@ func Difference(s1, s2 Set) Set {
 	s.Erase(Intersection(s1, s2).Value())
 	return s
 }
+
+// Subtract ...
+func Subtract(s1, s2 Set) Set {
+	cl := s1.Clone()
+	cl.Erase(Intersection(s1, s2).Value())
+	return cl
+}
