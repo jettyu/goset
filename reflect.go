@@ -250,7 +250,7 @@ func (p reflectSet) Search(v interface{}, pos int) int {
 // Has ...
 func (p reflectSet) Has(v interface{}, pos int) bool {
 	n := p.Search(v, pos)
-	if n == p.items.Len() || !p.items.equalFunc(p.items.elem(pos+n), v) {
+	if pos+n == p.items.Len() || !p.items.equalFunc(p.items.elem(pos+n), v) {
 		return false
 	}
 	return true

@@ -38,7 +38,7 @@ func (p *set) Search(v interface{}, pos int) int {
 
 func (p *set) Has(v interface{}, pos int) bool {
 	n := p.Search(v, pos)
-	if n == p.items.Len() || !p.items.Elem(pos+n).Equal(v.(Element)) {
+	if pos+n == p.items.Len() || !p.items.Elem(pos+n).Equal(v.(Element)) {
 		return false
 	}
 	return true
